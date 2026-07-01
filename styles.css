@@ -1,0 +1,32 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.cell {
+    width: 15px;
+    height: 15px;
+    border: 1px solid black;
+    display: inline-block;
+    
+
+
+}
+
+.grid{
+    display: flex;
+    flex-direction: column;
+    font-size: 0;
+    align-items: center;
+    margin-top: 2%;
+    /* place-items: center; */
+}
+
+.row {
+    margin: 0;
+}
+
+.arrowHead {
+    background-color: purple;
+}
