@@ -5,14 +5,20 @@
 }
 
 .cell {
-    width: 15px;
-    height: 15px;
+    color: #ffffff !important;
+    font-size: 15px;   /* Adjust this down if your squares are very small */
+    line-height: 1;
+    text-align: center;
+    width: 20px;
+    height: 20px;
     border: 1px solid black;
     display: inline-block;
-    
+    vertical-align: top;
+    box-sizing: border-box;
 
 
 }
+
 
 .grid{
     display: flex;
@@ -29,4 +35,12 @@
 
 .arrowHead {
     background-color: purple;
+}
+
+.arrowHead:hover {
+    background-color: #800080;
+}
+
+.tail {
+    background-color: red;
 }
