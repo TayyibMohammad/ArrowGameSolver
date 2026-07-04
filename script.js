@@ -1,63 +1,143 @@
-
+const arrowController = new AbortController();
 
 window.addEventListener('keydown', (e) => {
     const allCells = document.querySelectorAll('.cell');
 
     indexCell = parseInt(currNodeElement.dataset.index);
     console.log('Current cell index:', indexCell);
-    let first = null;
+    let first1 = null;
+    let first2 = null;
+    let first3 = null;
+    let first4 = null;
+
+    if (indexCell + 20 >= 400) console.log('Hit bottom boundary');
+    else{
+        // Body trails behind it (below it)
+        first1 = allCells[indexCell + 20]; 
+        // indexCell = indexCell + 20; // Move head up
+
+    }
+
+    if (indexCell - 20 < 0) console.log('Hit top boundary');
+    else {
+        // Body trails behind it (above it)
+        first2 = allCells[indexCell - 20]; 
+        // indexCell = indexCell - 20; // Move head down
+
+    }
+
+    if (indexCell % 20 === 19) console.log('Hit right boundary');
+    else{
+        // Body trails behind it to the RIGHT
+        first3  = allCells[indexCell + 1]; 
+        // indexCell = indexCell + 1; // Move head left
+
+    }
+        
+
+    if (indexCell % 20 === 0) console.log('Hit left boundary');
+    else{
+        // Body trails behind it to the LEFT
+        first4 = allCells[indexCell - 1]; 
+        // indexCell = indexCell - 1; // Move head right
+
+    }
 
     if (e.key === 'ArrowUp') {
         currNodeElement.innerHTML = '&#8593;';
-        // Check if head is at the top row
-        if (indexCell + 20 >= 400) return; 
+
+        if (first1) {
         
-        // Body trails behind it (below it)
-        first = allCells[indexCell + 20]; 
-        indexCell = indexCell + 20; // Move head up
+        first1.classList.add('tail');
+        }
+        if (first2) {
+            
+            first2.classList.remove('tail');
+        }
+        if (first3) {
+            
+            first3.classList.remove('tail');
+        }
+        if (first4) {
+            
+            first4.classList.remove('tail');
+        }
+
+        // Check if head is at the top row
     }
+    
     
     else if (e.key === 'ArrowDown') {
         currNodeElement.innerHTML = '&#8595;';
         // Check if head is at the bottom row
-        if (indexCell - 20 < 0) return; 
-        
-        // Body trails behind it (above it)
-        first = allCells[indexCell - 20]; 
-        indexCell = indexCell - 20; // Move head down
+        if (first1) {
+            
+            first1.classList.remove('tail');
+        }
+        if (first2) {
+            
+            first2.classList.add('tail');
+        }
+        if (first3) {
+            
+            first3.classList.remove('tail');
+        }
+        if (first4) {
+            
+            first4.classList.remove('tail');
+        }
     }
     
     else if (e.key === 'ArrowLeft') {
         currNodeElement.innerHTML = '&#8592;';
         // Check if head is on the leftmost column
-        if (indexCell % 20 === 19) return; 
+        if (first1) {
+            
+            first1.classList.remove('tail');
+        }
+        if (first2) {
+            
+            first2.classList.remove('tail');
+        }
+        if (first3) {
+            
+            first3.classList.add('tail');
+        }
+        if (first4) {
+            
+            first4.classList.remove('tail');
+        }
+
         
-        // Body trails behind it to the RIGHT
-        first = allCells[indexCell + 1]; 
-        indexCell = indexCell + 1; // Move head left
     }
     
     else if (e.key === 'ArrowRight') {
         currNodeElement.innerHTML = '&#8594;';
         // Check if head is on the rightmost column
-        if (indexCell % 20 === 0) return; 
+        if (first1) {
+            
+            first1.classList.remove('tail');
+        }
+        if (first2) {
+            
+            first2.classList.remove('tail');
+        }
+        if (first3) {
+            
+            first3.classList.remove('tail');
+        }
+        if (first4) {
+            
+            first4.classList.add('tail');
+        }
         
-        // Body trails behind it to the LEFT
-        first = allCells[indexCell - 1]; 
-        indexCell = indexCell - 1; // Move head right
     } else {
         return;
     }
-     
-    if (first) {
-        console.log('First cell index:', first.dataset.index);
-        first.classList.add('tail');
-    }
-    
     // Update the visual head element reference
 
     // currNodeElement = allCells[indexCell];
-});
+}, { signal: arrowController.signal });
 var grid = document.querySelector('.grid');
 
 const ROWS = 20;
@@ -87,20 +167,20 @@ var currNodeElement = null;
 const gridCells = document.querySelectorAll('.cell');
 
 gridCells.forEach((cell, index) => {
-    cell.addEventListener('click', () => {
-        addArrow(cell, index);
-    })
+    cell.addEventListener('click', (e) => {
+        addArrow(e, cell, index);
+    }, { signal: arrowController.signal })
 })
 
-const addArrow = (cell, index) => {
+const addArrow = (e, cell, index) => {
     console.log('Clicked cell index:', cell.dataset.index);
-    if(!cell.classList.contains('arrowHead')) {
+    if(!cell.classList.contains('arrowHead') && !cell.classList.contains('tail')) {
         cell.classList.add('arrowHead');
         currNode = maxNode;
         cell.classList.add(currNode);
         currNodeElement = cell;
         maxNode ++;
-    }else{
+    }else if(!cell.classList.contains('tail')){
         currNodeElement = cell;
         currNode = parseInt(cell.classList[2]);
         console.log(currNode);
@@ -109,5 +189,14 @@ const addArrow = (cell, index) => {
 
 
 }
+
+
+
+var btn = document.getElementById('lockButton');
+btn.addEventListener('click', () => {
+    arrowController.abort(); // Cleans up everything instantly!
+    console.log('Arrow heads locked. All click events destroyed.');
+})
+
 
 
