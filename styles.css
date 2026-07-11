@@ -59,3 +59,17 @@
     border-radius: 5px;
     cursor: pointer;
 }
+
+#solveButton {
+    position: fixed;
+    bottom: 60px; /* Adjust this value to position the button above the lock button */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #008CBA; /* Blue */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}

@@ -26,6 +26,7 @@ window.addEventListener('keydown', (e) => {
     else {
         // Body trails behind it (above it)
         first2 = allCells[indexCell - 20]; 
+
         // indexCell = indexCell - 20; // Move head down
 
     }
@@ -51,19 +52,19 @@ window.addEventListener('keydown', (e) => {
         currNodeElement.innerHTML = '&#8593;';
 
         if (first1) {
-        
+        first1.classList.add(indexCell);
         first1.classList.add('tail');
         }
         if (first2) {
-            
+            first2.classList.remove(indexCell);
             first2.classList.remove('tail');
         }
         if (first3) {
-            
+            first3.classList.remove(indexCell);
             first3.classList.remove('tail');
         }
         if (first4) {
-            
+            first4.classList.remove(indexCell);
             first4.classList.remove('tail');
         }
 
@@ -75,19 +76,19 @@ window.addEventListener('keydown', (e) => {
         currNodeElement.innerHTML = '&#8595;';
         // Check if head is at the bottom row
         if (first1) {
-            
+            first1.classList.remove(indexCell);
             first1.classList.remove('tail');
         }
         if (first2) {
-            
+            first2.classList.add(indexCell);
             first2.classList.add('tail');
         }
         if (first3) {
-            
+            first3.classList.remove(indexCell);
             first3.classList.remove('tail');
         }
         if (first4) {
-            
+            first4.classList.remove(indexCell);
             first4.classList.remove('tail');
         }
     }
@@ -96,19 +97,19 @@ window.addEventListener('keydown', (e) => {
         currNodeElement.innerHTML = '&#8592;';
         // Check if head is on the leftmost column
         if (first1) {
-            
+            first1.classList.remove(indexCell);
             first1.classList.remove('tail');
         }
         if (first2) {
-            
+            first2.classList.remove(indexCell);
             first2.classList.remove('tail');
         }
         if (first3) {
-            
+            first3.classList.add(indexCell);
             first3.classList.add('tail');
         }
         if (first4) {
-            
+            first4.classList.remove(indexCell);
             first4.classList.remove('tail');
         }
 
@@ -119,19 +120,19 @@ window.addEventListener('keydown', (e) => {
         currNodeElement.innerHTML = '&#8594;';
         // Check if head is on the rightmost column
         if (first1) {
-            
+            first1.classList.remove(indexCell);
             first1.classList.remove('tail');
         }
         if (first2) {
-            
+            first2.classList.remove(indexCell);
             first2.classList.remove('tail');
         }
         if (first3) {
-            
+            first3.classList.remove(indexCell);
             first3.classList.remove('tail');
         }
         if (first4) {
-            
+            first4.classList.add(indexCell);
             first4.classList.add('tail');
         }
         
@@ -161,6 +162,14 @@ const addBodyFunctionality = (e) => {
                 let first3 = null;
                 let first4 = null;
 
+                let head1 = null;
+                let head2 = null;
+                let head3 = null;
+                let head4 = null;
+
+
+                let count = 0;
+
                 if (indexCell + 20 < 400) {
                     first1 = allCells[indexCell + 20];
                 }
@@ -177,12 +186,43 @@ const addBodyFunctionality = (e) => {
                     first4 = allCells[indexCell - 1];
                 }
 
-                if ((first1 && first1.classList.contains('tail')) ||
-                    (first2 && first2.classList.contains('tail')) ||
-                    (first3 && first3.classList.contains('tail')) ||
-                    (first4 && first4.classList.contains('tail'))) {    
-                        cell.classList.add('tail');
-                    }
+                if(first1 && first1.classList.contains('tail')) {
+                    head1 = parseInt(first1.classList[1]);
+                    const targetSnake = snakes.find(snake => snake.index === head1);
+                    console.log('Adding tail to snake with head index:', head1);
+                    targetSnake.body.push(indexCell);
+                    cell.classList.add(head1);
+                    cell.classList.add('tail');
+                }
+
+                else if(first2 && first2.classList.contains('tail')) {
+                    head2 = parseInt(first2.classList[1]);
+                    console.log('Adding tail to snake with head index:', head2);
+                    const targetSnake = snakes.find(snake => snake.index === head2);
+                    targetSnake.body.push(indexCell);
+                    cell.classList.add(head2);
+                    cell.classList.add('tail');
+                }
+
+                else if(first3 && first3.classList.contains('tail')) {
+                    head3 = parseInt(first3.classList[1]);
+                    console.log('Adding tail to snake with head index:', head3);
+                    const targetSnake = snakes.find(snake => snake.index === head3);
+                    targetSnake.body.push(indexCell);
+                    cell.classList.add(head3);
+                    cell.classList.add('tail');
+                }
+
+                else if(first4 && first4.classList.contains('tail')) {
+                    head4 = parseInt(first4.classList[1]);
+                    console.log('Adding tail to snake with head index:', head4);
+                    const targetSnake = snakes.find(snake => snake.index === head4);
+                    targetSnake.body.push(indexCell);
+                    cell.classList.add(head4);
+                    cell.classList.add('tail');
+                }
+
+                
             }
         })  
     })
@@ -283,11 +323,11 @@ console.log('Arrow head at index:', indexCell, 'with direction:', dir);
             }
 
             if(first) {
-                snakes.push({ index: indexCell, direction: dir , body: [ parseInt(first.dataset.index) ]});
+                snakes.push({index: indexCell, direction: dir , body: [ parseInt(first.dataset.index) ]});
 
             }
             else{
-                snakes.push({ index: indexCell, direction: dir , body: []});
+                snakes.push({index: indexCell, direction: dir , body: []});
             }
             
         }
@@ -296,6 +336,119 @@ console.log('Arrow head at index:', indexCell, 'with direction:', dir);
     console.log('Arrow heads locked. All click events destroyed.');
     addBodyFunctionality();
     console.log('Body functionality added. Click on cells to add tails.');
+})
+
+const solveButton = document.getElementById('solveButton');
+
+let matrix = Array(ROWS*COLS).fill(0).map(() => Array(ROWS*COLS).fill(0));
+
+solveButton.addEventListener('click', () => {
+    console.log('Solving the game...');
+    const allCells = document.querySelectorAll('.cell');
+
+    snakes.forEach((snake, index) => {
+        let indexCell = snake.index;
+        let dir = snake.direction;
+        console.log(indexCell, " ", dir)
+
+        if(dir === 'up'){
+            for(let i = indexCell-20; i>=0;i-=20){
+                let curr = allCells[i];
+                if(curr.classList.contains('tail')){
+                    let rep = parseInt(curr.classList[1]);
+                    let target = snakes.find(snake => snake.index === rep);
+
+                    let j = target.index;
+                    console.log(j, " ", indexCell);
+                    matrix[j][indexCell] = 1;
+                }
+                else if(curr.classList.contains('arrowHead')){
+                    let rep = parseInt(curr.classList[2]);
+                    let target = snakes.find(snake => snake.index === rep);
+
+                    let j = target.index;
+                    console.log(j, " ", indexCell);
+                    matrix[j][indexCell] = 1;
+                }
+            }
+            
+            
+
+        } 
+        else if(dir === 'down'){
+            for(let i = indexCell+20; i<400;i+=20){
+                let curr = allCells[i];
+                if(curr.classList.contains('tail')){
+                    let rep = parseInt(curr.classList[1]);
+                    let target = snakes.find(snake => snake.index === rep);
+
+                    let j = target.index;
+                    console.log(j, " ", indexCell);
+
+                    matrix[j][indexCell] = 1;
+                }
+                else if(curr.classList.contains('arrowHead')){
+                    let rep = parseInt(curr.classList[2]);
+                    let target = snakes.find(snake => snake.index === rep);
+
+                    let j = target.index;
+                    console.log(j, " ", indexCell);
+
+                    matrix[j][indexCell] = 1;
+                }
+            }
+
+        }
+        else if(dir === 'left'){
+            for(let i = indexCell-1; i%20===0 && i%20!==19;i--){
+                let curr = allCells[i];
+                if(curr.classList.contains('tail')){
+                    let rep = parseInt(curr.classList[1]);
+                    let target = snakes.find(snake => snake.index === rep);
+
+                    let j = target.index;
+                    console.log(j, " ", indexCell);
+                    
+                    matrix[j][indexCell] = 1;
+                }
+                else if(curr.classList.contains('arrowHead')){
+                    let rep = parseInt(curr.classList[2]);
+                    let target = snakes.find(snake => snake.index === rep);
+
+                    let j = target.index;
+                    console.log(j, " ", indexCell);
+                    
+                    matrix[j][indexCell] = 1;
+                }
+            }
+        }
+        else if(dir === 'right'){
+            for(let i = indexCell+1; i%20===19 && i%20!==0;i++){
+                let curr = allCells[i];
+                if(curr.classList.contains('tail')){
+                    let rep = parseInt(curr.classList[1]);
+                    let target = snakes.find(snake => snake.index === rep);
+
+                    let j = target.index;
+                    console.log(j, " ", indexCell);
+                    
+                    matrix[j][indexCell] = 1;
+                }
+                else if(curr.classList.contains('arrowHead')){
+                    let rep = parseInt(curr.classList[2]);
+                    let target = snakes.find(snake => snake.index === rep);
+
+                    let j = target.index;
+                    console.log(j, " ", indexCell);
+                    
+                    matrix[j][indexCell] = 1;
+                }
+            }
+        }
+
+    })
+
+
 })
 
 
