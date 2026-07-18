@@ -269,6 +269,7 @@ const addArrow = (e, cell, index) => {
         cell.classList.add('arrowHead');
         currNode = maxNode;
         cell.classList.add(currNode);
+        cell.classList.add(index)
         currNodeElement = cell;
         maxNode ++;
     }else if(!cell.classList.contains('tail')){
@@ -363,7 +364,7 @@ solveButton.addEventListener('click', () => {
                     matrix[j][indexCell] = 1;
                 }
                 else if(curr.classList.contains('arrowHead')){
-                    let rep = parseInt(curr.classList[2]);
+                    let rep = parseInt(curr.classList[3]);
                     let target = snakes.find(snake => snake.index === rep);
 
                     let j = target.index;
@@ -388,7 +389,7 @@ solveButton.addEventListener('click', () => {
                     matrix[j][indexCell] = 1;
                 }
                 else if(curr.classList.contains('arrowHead')){
-                    let rep = parseInt(curr.classList[2]);
+                    let rep = parseInt(curr.classList[3]);
                     let target = snakes.find(snake => snake.index === rep);
 
                     let j = target.index;
@@ -412,7 +413,7 @@ solveButton.addEventListener('click', () => {
                     matrix[j][indexCell] = 1;
                 }
                 else if(curr.classList.contains('arrowHead')){
-                    let rep = parseInt(curr.classList[2]);
+                    let rep = parseInt(curr.classList[3]);
                     let target = snakes.find(snake => snake.index === rep);
 
                     let j = target.index;
@@ -448,8 +449,65 @@ solveButton.addEventListener('click', () => {
 
     })
 
+    const order = solve(matrix)
+
+    console.log(order)
+
 
 })
+
+const cells = document.querySelectorAll('.cell')
+
+
+function solve(graph) {
+    const nodes = graph.length;
+    const inDegree = new Array(nodes).fill(0);
+    const order = [];
+    const queue = [];
+
+    // 1. Calculate in-degrees by summing columns
+    for (let i = 0; i < nodes; i++) {
+        for (let j = 0; j < nodes; j++) {
+            if (graph[j][i]) {
+                inDegree[i]++;
+            }
+        }
+    }
+
+
+    // 2. Queue all source nodes (nodes with 0 incoming edges)
+    for (let i = 0; i < nodes; i++) {
+        if (inDegree[i] === 0 && cells[i].classList.contains('arrowHead')) {
+            queue.push(i);
+            
+        }
+    }
+
+    // 3. Process nodes with BFS
+    while (queue.length > 0) {
+        const u = queue.shift();
+        order.push(u);
+
+        // Decrease in-degree for all neighbors of node u
+        for (let v = 0; v < nodes; v++) {
+            if (graph[u][v]) {
+                inDegree[v]--;
+                // If neighbor becomes a source, queue it
+                if (inDegree[v] === 0) {
+                    queue.push(v);
+                }
+            }
+        }
+    }
+
+    // 4. Check for cycles
+    if (order.length !== snakes.length) {
+        throw new Error("Graph contains a cycle! Topological sort is impossible.");
+    }
+
+    return order;
+}
+
 
 
 
