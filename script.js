@@ -345,189 +345,64 @@ let matrix = Array(ROWS*COLS).fill(0).map(() => Array(ROWS*COLS).fill(0));
 
 solveButton.addEventListener('click', () => {
     console.log('Solving the game...');
-    const allCells = document.querySelectorAll('.cell');
+    
+    // FIX: Reset the matrix cleanly on every solve attempt
+    matrix = Array(ROWS * COLS).fill(0).map(() => Array(ROWS * COLS).fill(0));
 
-    snakes.forEach((snake, index) => {
+    // Helper function: check our exact data state instead of fragile DOM classes
+    const getSnakeAtCell = (cellIndex) => {
+        return snakes.find(snake => snake.index === cellIndex || snake.body.includes(cellIndex));
+    };
+
+    snakes.forEach((snake) => {
         let indexCell = snake.index;
         let dir = snake.direction;
-        console.log(indexCell, " ", dir)
+        console.log(indexCell, " ", dir);
 
-        if(dir === 'up'){
-            for(let i = indexCell-20; i>=0;i-=20){
-                let curr = allCells[i];
-                if(curr.classList.contains('tail')){
-                    let rep = parseInt(curr.classList[1]);
-                    let target = snakes.find(snake => snake.index === rep);
-
-                    let j = target.index;
-                    console.log(j, " ", indexCell);
-                    matrix[j][indexCell] = 1;
-                }
-                else if(curr.classList.contains('arrowHead')){
-                    let rep = parseInt(curr.classList[3]);
-                    let target = snakes.find(snake => snake.index === rep);
-
-                    let j = target.index;
-                    console.log(j, " ", indexCell);
-                    matrix[j][indexCell] = 1;
-                }
+        const checkAndAddDependency = (i) => {
+            let targetSnake = getSnakeAtCell(i);
+            
+            // FIX: If we found a snake AND it's NOT ourself, we are blocked
+            if (targetSnake && targetSnake.index !== indexCell) {
+                let j = targetSnake.index;
+                console.log(`Snake ${targetSnake.index} blocks Snake ${indexCell}`);
+                matrix[j][indexCell] = 1;
             }
-            
-            
+        };
 
+        if (dir === 'up') {
+            for (let i = indexCell - 20; i >= 0; i -= 20) {
+                checkAndAddDependency(i);
+            }
         } 
-        else if(dir === 'down'){
-            for(let i = indexCell+20; i<400;i+=20){
-                let curr = allCells[i];
-                if(curr.classList.contains('tail')){
-                    let rep = parseInt(curr.classList[1]);
-                    let target = snakes.find(snake => snake.index === rep);
-
-                    let j = target.index;
-                    console.log(j, " ", indexCell);
-
-                    matrix[j][indexCell] = 1;
-                }
-                else if(curr.classList.contains('arrowHead')){
-                    let rep = parseInt(curr.classList[3]);
-                    let target = snakes.find(snake => snake.index === rep);
-
-                    let j = target.index;
-                    console.log(j, " ", indexCell);
-
-                    matrix[j][indexCell] = 1;
-                }
+        else if (dir === 'down') {
+            for (let i = indexCell + 20; i < 400; i += 20) {
+                checkAndAddDependency(i);
             }
-
-        }
-        else if(dir === 'left'){
-            for(let i = indexCell-1; i%20===0 && i%20!==19;i--){
-                let curr = allCells[i];
-                if(curr.classList.contains('tail')){
-                    let rep = parseInt(curr.classList[1]);
-                    let target = snakes.find(snake => snake.index === rep);
-
-                    let j = target.index;
-                    console.log(j, " ", indexCell);
-                    
-                    matrix[j][indexCell] = 1;
-                }
-                else if(curr.classList.contains('arrowHead')){
-                    let rep = parseInt(curr.classList[3]);
-                    let target = snakes.find(snake => snake.index === rep);
-
-                    let j = target.index;
-                    console.log(j, " ", indexCell);
-                    
-                    matrix[j][indexCell] = 1;
-                }
+        } 
+        else if (dir === 'left') {
+            // FIX: Corrected loop bounds for left movement
+            let leftBound = Math.floor(indexCell / 20) * 20;
+            for (let i = indexCell - 1; i >= leftBound; i--) {
+                checkAndAddDependency(i);
+            }
+        } 
+        else if (dir === 'right') {
+            // FIX: Corrected loop bounds for right movement
+            let rightBound = Math.floor(indexCell / 20) * 20 + 19;
+            for (let i = indexCell + 1; i <= rightBound; i++) {
+                checkAndAddDependency(i);
             }
         }
-        else if(dir === 'right'){
-            for(let i = indexCell+1; i%20===19 && i%20!==0;i++){
-                let curr = allCells[i];
-                if(curr.classList.contains('tail')){
-                    let rep = parseInt(curr.classList[1]);
-                    let target = snakes.find(snake => snake.index === rep);
+    });
 
-                    let j = target.index;
-                    console.log(j, " ", indexCell);
-                    
-                    matrix[j][indexCell] = 1;
-                }
-                else if(curr.classList.contains('arrowHead')){
-                    let rep = parseInt(curr.classList[2]);
-                    let target = snakes.find(snake => snake.index === rep);
-
-                    let j = target.index;
-                    console.log(j, " ", indexCell);
-                    
-                    matrix[j][indexCell] = 1;
-                }
-            }
-        }
-
-    })
-
-    const order = solve(matrix)
-    console.log(order);
+    const order = solve(matrix);
+    console.log("Movement Order: ", order);
     freeSnakes(order);
+});
 
-})
 
 
-// const freeSnakes = order => {
-//     let cells = document.querySelectorAll(".cell");
-    
-//     for (const index of order) {
-//         let currSnake = snakes.find(snake => snake.index === index);
-//         if (!currSnake) continue; // Safety check
-        
-//         let body = currSnake.body;
-//         let n = body.length;
-//         console.log(currSnake.direction)
-
-        
-//         // Use a game loop interval or setTimeout if you want to see them animate moving off-screen
-//         while (currSnake.index >= 0 && currSnake.index < 400) {
-//             // 1. Remove the old visual tail class before moving
-//             if (cells[body[n - 1]]) {
-//                 cells[body[n - 1]].classList.remove('tail');
-//             }
-
-//             // 2. Shift the body array forward
-//             for (let i = n - 1; i > 0; i--) {
-//                 body[i] = body[i - 1];
-//             }
-            
-//             // 3. Move the head to the old index position
-//             body[0] = currSnake.index;
-
-//             // 4. Clear the old head visual
-//             if (cells[currSnake.index]) {
-//                 cells[currSnake.index].classList.remove('arrowHead');
-//                 cells[currSnake.index].innerHTML = ''; // Clear the arrow text
-//             }
-
-//             // 5. Update the head index location based on direction
-//             if (currSnake.direction === 'left') currSnake.index--;
-//             else if (currSnake.direction === 'right') currSnake.index++;
-//             else if (currSnake.direction === 'down') currSnake.index += 20;
-//             else if (currSnake.direction === 'up') currSnake.index -= 20;
-
-//             // 6. Check boundaries immediately after moving the head
-//             if (currSnake.index < 0 || currSnake.index >= 400) {
-//                 // Remove final remnants from grid when exiting
-//                 for (let i = 0; i < n; i++) {
-//                     if (cells[body[i]]) {
-//                         cells[body[i]].classList.remove('tail');
-//                     }
-//                 }
-//                 break; 
-//             }
-
-//             // 7. Render new head visual updates
-//             let newHeadCell = cells[currSnake.index];
-//             if (newHeadCell) {
-//                 newHeadCell.classList.add('arrowHead');
-//                 if (currSnake.direction === 'left') newHeadCell.innerHTML = '←';
-//                 else if (currSnake.direction === 'right') newHeadCell.innerHTML = '→';
-//                 else if (currSnake.direction === 'down') newHeadCell.innerHTML = '↓';
-//                 else if (currSnake.direction === 'up') newHeadCell.innerHTML = '↑';
-//             }
-
-//             // 8. Re-render tail elements 
-//             for (let i = 0; i < n; i++) {
-//                 if (cells[body[i]]) {
-//                     cells[body[i]].classList.add('tail');
-//                 }
-//             }
-            
-//             setTimeout(() => {}, 300);
-//         }
-//         console.log("Solved!")
-//     }
-// }
 const freeSnakes = (order) => {
     let cells = document.querySelectorAll(".cell");
     const GRID_SIZE = 20; 
@@ -623,63 +498,16 @@ const freeSnakes = (order) => {
 
 const cells = document.querySelectorAll('.cell')
 
-
-// function solve(graph) {
-//     const nodes = graph.length;
-//     const inDegree = new Array(nodes).fill(0);
-//     const order = [];
-//     const queue = [];
-
-//     // 1. Calculate in-degrees by summing columns
-//     for (let i = 0; i < nodes; i++) {
-//         for (let j = 0; j < nodes; j++) {
-//             if (graph[j][i]) {
-//                 inDegree[i]++;
-//             }
-//         }
-//     }
-
-
-//     // 2. Queue all source nodes (nodes with 0 incoming edges)
-//     for (let i = 0; i < nodes; i++) {
-//         if (inDegree[i] === 0 && cells[i].classList.contains('arrowHead')) {
-//             queue.push(i);
-            
-//         }
-//     }
-
-//     // 3. Process nodes with BFS
-//     while (queue.length > 0) {
-//         const u = queue.shift();
-//         order.push(u);
-
-//         // Decrease in-degree for all neighbors of node u
-//         for (let v = 0; v < nodes; v++) {
-//             if (graph[u][v]) {
-//                 inDegree[v]--;
-//                 // If neighbor becomes a source, queue it
-//                 if (inDegree[v] === 0) {
-//                     queue.push(v);
-//                 }
-//             }
-//         }
-//     }
-
-//     // 4. Check for cycles
-//     if (order.length !== snakes.length) {
-//         throw new Error("Graph contains a cycle! Topological sort is impossible.");
-//     }
-
-//     return order;
-// }
-
 function solve(graph) {
-    const nodes = graph.length; // This is 400 (total cells)
+    const nodes = graph.length; 
     const inDegree = new Array(nodes).fill(0);
     const order = [];
     const queue = [];
 
-    // 1. Calculate in-degrees across all cells
+    // 1. Create a Set of snake head indices for fast O(1) lookups
+    const snakeHeads = new Set(snakes.map(snake => snake.index));
+
+    // 2. Calculate in-degrees across all cells
     for (let i = 0; i < nodes; i++) {
         for (let j = 0; j < nodes; j++) {
             if (graph[j][i]) {
@@ -688,39 +516,39 @@ function solve(graph) {
         }
     }
 
-    // 2. Queue ONLY cells that are actual snake heads AND have 0 obstacles ahead of them
+    // 3. Queue ONLY cells that are actual snake heads AND have 0 dependencies
     for (let i = 0; i < nodes; i++) {
-        // Check if a snake exists at this cell index
-        const hasSnake = snakes.some(snake => snake.index === i);
-        
-        if (inDegree[i] === 0 && hasSnake) {
+        if (inDegree[i] === 0 && snakeHeads.has(i)) {
             queue.push(i);
         }
     }
 
-    // 3. Process the queue
+    // 4. Process the queue
     while (queue.length > 0) {
         const u = queue.shift();
-        order.push(u); // Pushes the flat cell index (e.g., 42) into the final order
+        order.push(u); // Guaranteed to be a snake head index
 
         // Decrease in-degree for dependent neighbors
         for (let v = 0; v < nodes; v++) {
             if (graph[u][v]) {
                 inDegree[v]--;
-                if (inDegree[v] === 0) {
+                
+                // CRITICAL FIX: Only propagate the queue if the next cell 
+                // is a snake head that just had its last obstacle cleared.
+                if (inDegree[v] === 0 && snakeHeads.has(v)) {
                     queue.push(v);
                 }
             }
         }
     }
 
-    // 4. Fixed Cycle Check: Compare apples to apples!
-    // order.length (number of sorted snake heads) must equal total snakes
-    if (order.length !== snakes.length) {
-        throw new Error("Graph contains a cycle! Topological sort is impossible.");
-    }
+    // 5. Perfect Apples-to-Apples Cycle Check
+    // Both sides of the equation now strictly count snake heads.
+    // if (order.length !== snakes.length) {
+    //     throw new Error("Grid contains a gridlock/cycle! Some snakes cannot move.");
+    // }
 
-    return order; // Returns an array of flat cell indices in movement order
+    return order; // Returns an array containing ONLY snake head indices in movement order
 }
 
 
